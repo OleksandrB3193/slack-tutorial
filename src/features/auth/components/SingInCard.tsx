@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { TriangleAlert, Eye, EyeOff } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -26,9 +27,32 @@ export const SingInCard = ({ setState }: SingInCardProps) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const onPasswordSignIn = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setPending(true);
+    signIn("password", {
+      email,
+      password,
+      flow: "signIn",
+    })
+      .catch((error) => {
+        setError(error.message);
+      })
+      .finally(() => setPending(false));
+  };
 
   const onProviderSignIn = (value: "github" | "google") => {
-    signIn(value);
+    setPending(true);
+    signIn(value)
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => setPending(false));
   };
 
   return (
@@ -39,7 +63,7 @@ export const SingInCard = ({ setState }: SingInCardProps) => {
           Enter your email and password to login to your account
         </CardDescription>
         <CardContent className="space-y-4 px-0 pb-0">
-          <form action="" className="space-y-2.5">
+          <form onSubmit={onPasswordSignIn} className="space-y-2.5">
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
@@ -50,26 +74,47 @@ export const SingInCard = ({ setState }: SingInCardProps) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={false}
+                  disabled={pending}
                 />
               </div>
               <div className="space-y-1.5 mt-4">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  id="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={false}
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={pending}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    disabled={pending}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
+              {error && (
+                <p className="text-red-500 text-sm flex gap-2 items-center bg-red-500/10 p-2 rounded-md">
+                  <TriangleAlert className="size-4" />
+                  {error}
+                </p>
+              )}
               <Button
                 type="submit"
                 className="w-full mt-4"
                 size="lg"
-                disabled={false}
+                disabled={pending}
               >
                 Continue
               </Button>
