@@ -27,7 +27,7 @@ export const SingInCard = ({ setState }: SingInCardProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleProviderSignIn = (value: "github" | "google") => {
+  const onProviderSignIn = (value: "github" | "google") => {
     signIn(value);
   };
 
@@ -79,12 +79,17 @@ export const SingInCard = ({ setState }: SingInCardProps) => {
           <Separator />
 
           <div className="flex flex-col gap-2 items-center justify-center">
-            <Button variant="outline" size="lg" className="w-full relative">
+            <Button
+              onClick={() => onProviderSignIn("google")}
+              variant="outline"
+              size="lg"
+              className="w-full relative"
+            >
               <FcGoogle className="size-5 absolute top-2.5 left-2.5 cursor-pointer" />
               Continue with Google
             </Button>
             <Button
-              onClick={() => handleProviderSignIn("github")}
+              onClick={() => onProviderSignIn("github")}
               variant="outline"
               size="lg"
               className="w-full relative"
